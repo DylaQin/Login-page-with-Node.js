@@ -1,8 +1,33 @@
 const express = require('express');
+const passport = require('passport');
+const keys = require('./config/keys');
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+
 const app = express();
 
-app.get('/', (req, res) => {
-  res.send({ hi: 'there' });
-});
+// app.get('/', (req, res) => {
+//   res.send({ bye: 'buddy' });
+// });
 
-app.listen(3000);
+passport.use(
+  new GoogleStrategy({
+    clientID: keys.googleClientID,
+    clientSecret: keys.googleClientSecret,
+    callbackURL: '/auth/google/callback'
+  },
+  accessToken => {
+    console.log(accessToken);
+  }
+  )
+);
+
+app.get(
+  '/auth/google', 
+  passport.authenticate('google',{
+    scope: ['profile','email']
+  })
+);
+
+const PORT = process.env.PORT || 3000
+// If the environment variable is not defined (or falsy), it will default to port 5000.
+app.listen(PORT);
